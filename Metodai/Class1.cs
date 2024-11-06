@@ -1,4 +1,5 @@
-﻿using System.Reflection.Metadata;
+﻿using System.Collections.Generic;
+using System.Reflection.Metadata;
 using System.Reflection.Metadata.Ecma335;
 using System.Xml.Serialization;
 
@@ -6,19 +7,51 @@ namespace Metodai
 {
     public static class Methods
     {
-        public static Dictionary<string, int> Greeting(Dictionary <string, int> users,out string currentUser)
+        public static Dictionary<string, int> Greeting(Dictionary<string, int> users, out string currentUser)
         {
-            
+
             Console.WriteLine("Sveiki prisijungę į protmūšį!");
-            Console.WriteLine("Kad prisijungti veskite savo vardą ir pavardę: ");
-            currentUser = Console.ReadLine().Trim();
-            users.Add(currentUser, 0);            
+            bool success = true;
+            currentUser = "";
+            while (success)
+            {
+                Console.WriteLine("Kad prisijungti veskite savo vardą ir pavardę: ");
+                string input = Console.ReadLine().Trim();
+                int choice;
+                if (string.IsNullOrEmpty(input))
+                {
+                    Console.WriteLine("Bandykite dar kartą");
+                    continue;
+                }
+                else
+                {
+                    currentUser = input;
+                    success = false;
+                }
+            }
+            if (users.ContainsKey(currentUser))
+            {
+                Console.WriteLine("Prisijungėte su esamu vartotoju.");
+                Console.WriteLine("Sveiki sugrįžę!");
+                Console.ReadLine();
+                var updatedUsers = new Dictionary<string, int>();
+                foreach (var item in users)
+                {
+                    updatedUsers.Add(item.Key, item.Value);
+                    users = updatedUsers;
+                }
+            }
+            else
+            {
+                users.Add(currentUser, 0);
+            }
+            Console.Clear();
             Meniu(users, currentUser);
-            return users;            
+            return users;
         }
         public static void Meniu(Dictionary<string, int> users, string currentUser)
         {
-            
+            Console.Clear();
             Console.WriteLine("\t\t\t\t\t Dabartinis vartotojas  " + currentUser);
             Console.WriteLine("\t\t\t\t\t Meniu: ");
             Console.WriteLine("1. Atsijungimas ");
@@ -66,17 +99,16 @@ namespace Metodai
                     RulesDisplay(users, currentUser);
                     break;
                 case 3:
-                    Console.WriteLine("rezultatai");
+                    Console.Clear();
                     UsersDisplay(users, currentUser);
                     break;
                 case 4:
-                    Console.WriteLine("start game");
-                    StartGame(users, currentUser);                    
+                    StartGame(users, currentUser);
                     break;
                 case 5:
                     Console.Clear();
-                    Console.WriteLine("Išjungiame programą.");
-                    Console.WriteLine("Iki kito karto!!");
+                    Console.WriteLine("Iki kito karto!");
+                    success = false;
                     break;
                 default:
                     Console.WriteLine("Neteisinga įvestis.");
@@ -89,47 +121,95 @@ namespace Metodai
         }
         public static void UsersDisplay(Dictionary<string, int> users, string currentUser)
         {
-            Console.Clear();
             Console.WriteLine("\t\t\t\t\t Dabartinis vartotojas  " + currentUser);
-            Console.WriteLine("Visi esami vartotojai: ");
-            foreach (var item in users)
+            Console.WriteLine("Pasirinkite ką norite pamatyti: ");
+            Console.WriteLine("1. Visus esamus dalyvius");
+            Console.WriteLine("2. Dalyvių rezultatus");
+            bool success = true;
+            int finalChoice = 0;
+            while (success)
             {
-                Console.WriteLine(item);
+                Console.WriteLine("Įveskite savo pasirinkimą:         ");
+                string input = Console.ReadLine().Trim();
+                int choice;
+                if (string.IsNullOrEmpty(input))
+                {
+                    Console.WriteLine("Bandykite dar kartą");
+                    continue;
+                }
+                if (int.TryParse(input, out choice))
+                {
+                    if (choice > 0 && choice < 3)
+                    {
+                        success = false;
+                        finalChoice = choice;
+                    }
+                    else
+                    {
+                        Console.WriteLine("Bandykite dar kartą");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Bandykite dar kartą");
+                }
             }
-            bool success = false;
+            switch (finalChoice)
+            {
+                case 1:
+                    foreach (var item in users)
+                    {
+                        Console.WriteLine(item.Key);
+                    }
+                    break;
+                case 2:
+                    Console.Clear();
+                    Console.WriteLine("\t\t\t\t Visų žaidėjų lentelė: ");
+                    Console.WriteLine();
+                    var ordered = users.OrderByDescending(kvp => kvp.Value).ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+                    foreach (var item in ordered)
+                    {          
+                        Console.WriteLine(item);                       
+                    }
+                    break;
+                default:
+                    Console.WriteLine("Neteisinga įvestis.");
+                    UsersDisplay(users, currentUser);
+                    break;
+            }
             while (!success)
             {
                 Console.WriteLine("Įveskite q, kad grįžti į meniu.");
                 string input = Console.ReadLine().Trim();
                 if (input == "q")
                 {
-                 Meniu(users, currentUser);
+                    success = true;
+                    Meniu(users, currentUser);
                 }
             }
-            
+
         }
-    
-    public static void RulesDisplay(Dictionary<string, int> users, string currentUser)
-    {
-        Console.Clear();
-        Console.WriteLine("\t\t\t\t\t Dabartinis vartotojas  " + currentUser);
-        Console.WriteLine("Sveikiname prisijungus prie protmūšio!");
-        Console.WriteLine("Šis protmūšis turi X kategorijų. Kiekvienoje kategorijoje jums bus užduoti 5 klausimai.");
-        Console.WriteLine("Pasirinkus kategoriją pradėsite žaidimą ir turėsite pasirinkti teisingą atsakymą iš 4 galimų variantų");
-        Console.WriteLine("Jeigu jungiatės prie jau esamo vartotojo - to vartotojo taškai nėra sumuojami, pradedama skaičiuoti iš naujo.");
-        Console.WriteLine("Kiekvienas teisingas atsakymas jums pridės vieną tašką prie bendros taškų sumos.");
-        Console.WriteLine("Spauskite q raidę, norėdami grįžti į Meniu...");
-        string input = Console.ReadLine().Trim();
-        if (input == "q")
+
+        public static void RulesDisplay(Dictionary<string, int> users, string currentUser)
         {
+            Console.Clear();
+            Console.WriteLine("\t\t\t\t\t Dabartinis vartotojas  " + currentUser);
+            Console.WriteLine("Sveikiname prisijungus prie protmūšio!");
+            Console.WriteLine("Šis protmūšis turi X kategorijų. Kiekvienoje kategorijoje jums bus užduoti 5 klausimai.");
+            Console.WriteLine("Pasirinkus kategoriją pradėsite žaidimą ir turėsite pasirinkti teisingą atsakymą iš 4 galimų variantų");
+            Console.WriteLine("Kiekvienas teisingas atsakymas jums pridės vieną tašką prie bendros taškų sumos.");
+            Console.WriteLine("Spauskite q raidę, norėdami grįžti į Meniu...");
+            string input = Console.ReadLine().Trim();
+            if (input == "q")
+            {
                 Meniu(users, currentUser);
+            }
+            if (input != "q")
+            {
+                RulesDisplay(users, currentUser);
+            }
         }
-        if (input != "q")
-        {
-            RulesDisplay(users, currentUser);
-        }
-    }
-        public static void StartGame(Dictionary<string, int> users, string currentUser)
+        public static Dictionary<string, int> StartGame(Dictionary<string, int> users, string currentUser)
         {
             Console.WriteLine("\t\t\t\t\t Dabartinis vartotojas  " + currentUser);
             var questions = new List<string>
@@ -158,48 +238,119 @@ namespace Metodai
                 "1.Atėnai \n2.Belgradas \n3.Kraljevo \n4.Zrenjanin \n",
                 "1.Europa ir Afrika \n2.Europa ir Azija \n3.Šiaurės ir Pietų Amerikos \n4.Azijos ir Pietų amerikos \n"
             };
-            var answers = new List<int>
+            var answerNumber = new Dictionary<int, int>
             {
-                3, 
-                2, 
-                2, 
-                1, 
-                3, 
-                3, 
-                4, 
-                3, 
-                2, 
-                2
+                {0, 3},
+                {1, 2},
+                {2, 2},
+                {3, 1},
+                {4, 3},
+                {5, 3},
+                {6, 4},
+                {7, 3},
+                {8, 2},
+                {9, 2}
+            };
+            var answers = new Dictionary<int, string>
+            {
+                {0, "3. Japonija, " },
+                {1, "2. Nilo upė, " },
+                {2, "2. Saharos dykuma" },
+                {3, "1. Nepalas ir Kinija" },
+                {4, "3. Vatikano miestas" },
+                {5, "3. Australija" },
+                {6, "4. Kanbera" },
+                {7, "3. Nilas"},
+                {8, "2. Belgradas"},
+                {9, "2. Europa ir Azija" }
             };
             var askedQuestions = new List<int>();
             int correct = 0;
             for (int i = 0; i < 5; i++)
             {
-                var random = new Random();
-                int question = random.Next(5, 10);
-                               
-                if (!askedQuestions.Contains(question))
-                {
-                    askedQuestions.Add(question);
-                    Console.WriteLine(questions[question]);
-                    Console.Write(choices[question]);
-                    int input = int.Parse(Console.ReadLine());
-                    if (input == answers[question])
+             
+                    var random = new Random();
+                    int question = random.Next(0, 10);
+                    Console.Clear();
+                    Console.WriteLine("Šios sesijos metu turimas taškų kiekis: " + correct);
+                    Console.WriteLine(i + "  /  5");
+
+                    if (!askedQuestions.Contains(question))
                     {
-                        correct++;                        
-                    }                    
-                }
-                else
-                {
-                    i--;
-                    continue;
-                }
-            } 
+                        askedQuestions.Add(question);
+                        Console.WriteLine(questions[question]);
+                        Console.Write(choices[question]);
+                        int input = int.Parse(Console.ReadLine().Trim());
+                        Console.WriteLine("Teisingas atsakymas buvo: " + answers[question]);
+                        Console.WriteLine("Spauskite be kurį klaviša, kad gauti kitą klausimą...");
+                        Console.ReadLine();
+                            if (input == answerNumber[question])
+                            {
+                                correct++;
+                            }
+
+                    }
+                        else
+                        {
+                            i--;
+                            continue;
+                        }
+
+                    }
                 
+                if (users.ContainsKey(currentUser))
+                {
+                    var updatedUsers = new Dictionary<string, int>();
+                    foreach (var item in users)
+                    {
+                        if (item.Key == currentUser)
+                        {
+                            int x = item.Value;
+                            updatedUsers.Add(item.Key, x + correct);
+                            continue;
+                        }
+                        updatedUsers.Add(item.Key, item.Value);
+
+                    }
+                    users = updatedUsers;
+
+
+                }
+                var ordered = users.OrderBy(x => x.Value);
+                foreach (var item in users)
+                {
+                    Console.WriteLine(item);
+                }
+
+                bool success = false;
+                while (!success)
+                {
+                    Console.Clear();
+                    Console.WriteLine("Šios sesijos metu surinkote: " + correct);
+                    foreach (var item in users)
+                    {
+                        if (item.Key == currentUser)
+                        {
+                            Console.WriteLine("Bendra turimų taškų suma yra: " + item.Value);
+
+                        }
+                    }
+                    Console.WriteLine("Įveskite q, kad grįžti į meniu.");
+                    string input = Console.ReadLine().Trim();
+                    if (input == "q")
+                    {
+                        success = true;
+                        Meniu(users, currentUser);
+                    }
+
+                }
+                return users;
             }
         }
+    }
+
             
-        }
+        
    
 
 
