@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Metodai\Metodai.csproj" />
+    <ProjectReference Include="..\Projekto testai\Projekto testai.csproj" />
   </ItemGroup>
 
 </Project>
