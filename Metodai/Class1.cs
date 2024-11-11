@@ -88,9 +88,9 @@ namespace Metodai
             Console.WriteLine();
             Console.WriteLine("5. Išėjimas iš žaidimo");
             Console.WriteLine();
-            bool success = true;
+            bool something = true;
             int finalChoice = 0;
-            while (success)
+            while (something)
             {
                 Console.WriteLine("Įveskite savo pasirinkimą:        (1 - 5) ");
                 string input = Console.ReadLine().Trim();
@@ -104,7 +104,7 @@ namespace Metodai
                 {
                     if (choice > 0 && choice < 6)
                     {
-                        success = false;
+                        something = false;
                         finalChoice = choice;
                     }
                     else
@@ -136,8 +136,7 @@ namespace Metodai
                     break;
                 case 5:
                     Console.Clear();
-                    Console.WriteLine("Iki kito karto!");
-                    success = false;
+                    Console.WriteLine("Iki kito karto!");                    
                     break;
                 default:
                     Console.WriteLine("Neteisinga įvestis.");
@@ -251,12 +250,12 @@ namespace Metodai
             Console.WriteLine();
             Console.WriteLine("Spauskite q raidę, norėdami grįžti į Meniu...");
             Console.WriteLine();
-            string input = Console.ReadLine().Trim();
-            if (input == "q")
+            string input1 = Console.ReadLine().Trim();
+            if (input1 == "q")
             {
                 Meniu(users, currentUser);
             }
-            if (input != "q")
+            if (input1 != "q")
             {
                 RulesDisplay(users, currentUser);
             }
@@ -342,21 +341,21 @@ namespace Metodai
 
                     if (askedQuestions.Contains(question))
                     {
-                        i--;
+                        
                         continue;
                     }
                     else
                     {
                         Console.WriteLine(questions[question]);
                         Console.Write(choices[question]);
-                        string input = Console.ReadLine().Trim();
-                        if (string.IsNullOrEmpty(input))
+                        string input2 = Console.ReadLine().Trim();
+                        if (string.IsNullOrEmpty(input2))
                         {
                             Console.WriteLine("Bandykit dar kartą");
                             Console.ReadLine();
                             continue;
                         }
-                        if (int.TryParse(input, out int choice))
+                        if (int.TryParse(input2, out int choice))
                         {
                             if (choice > 0 && choice < 5)
                             {
@@ -416,8 +415,8 @@ namespace Metodai
 
 
             }
-            bool success = false;
-            while (!success)
+            bool changed = false;
+            while (!changed)
             {
                 Console.Clear();
                 Console.WriteLine("Šios sesijos metu surinkote: " + correct);
@@ -445,7 +444,19 @@ namespace Metodai
                 }
                 if (incorrectAnswers.Count == 0)
                 {
-                    success = true;
+                    while (!changed)
+                    {
+                        Console.WriteLine("Įveskite q, kad grįžti į meniu.");
+                        string exit5 = Console.ReadLine().Trim();
+
+                        if (exit5 == "q")
+                        {
+
+                            Meniu(users, currentUser);
+                            changed = true;
+                        }
+
+                    }
                 }
                 else 
                 { 
@@ -454,27 +465,33 @@ namespace Metodai
                 {
                     Console.WriteLine(item);
                     Console.WriteLine();
-                        success = true;
-                }
-                }
-            }
-            bool menu = true;
-            while (menu)
-            {
-                Console.WriteLine("Įveskite q, kad grįžti į meniu.");
-                string exit = Console.ReadLine().Trim();
+                        changed = true;
+                        bool menu = true;
+                        while (menu)
+                        {
+                            Console.WriteLine("Įveskite q, kad grįžti į meniu.");
+                            string exit = Console.ReadLine().Trim();
 
-                if (exit == "q")
-                {
+                            if (exit == "q")
+                            {
 
-                    Meniu(users, currentUser);
-                    menu = true;
+                                Meniu(users, currentUser);
+                                menu = false;
+                            }
+
+                        }
+                        return users;
+                    }
+                    
+                    
                 }
                 
             }
             return users;
+            
+        }       
         }
-        }
+    
     }
 
             
